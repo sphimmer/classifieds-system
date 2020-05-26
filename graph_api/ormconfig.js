@@ -1,10 +1,15 @@
-{
+require('dotenv').config()
+var parse = require('pg-connection-string').parse;
+var config = parse(process.env.DATABASE_URL)
+
+
+module.exports = {
     "type": "postgres",
-    "host": "localhost",
-    "port": 54320,
-    "username": "postgres",
-    "password": "password",
-    "database": "classified",
+    "host": config.host,
+    "port": config.port,
+    "username": config.user,
+    "password": config.password,
+    "database": config.database,
     "synchronize": true,
     "logging": false,
     "entities": [
@@ -21,4 +26,4 @@
        "migrationsDir": "src/migration",
        "subscribersDir": "src/subscriber"
     }
- }
+}
