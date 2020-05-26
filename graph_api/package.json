@@ -1,16 +1,18 @@
 {
   "name": "graph_api",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "",
   "main": "src/app.js",
   "dependencies": {
     "apollo-server-koa": "^2.13.1",
+    "dotenv": "^8.2.0",
     "koa": "^2.12.0",
     "koa-bodyparser": "^4.3.0",
     "koa-json": "^2.0.2",
     "koa-logger": "^3.2.1",
     "koa-router": "^8.0.8",
     "pg": "^8.0.3",
+    "pg-connection-string": "^2.2.3",
     "reflect-metadata": "^0.1.13",
     "type-graphql": "^0.17.6",
     "typedi": "^0.8.0",
@@ -27,8 +29,14 @@
     "@types/node": "^13.13.4"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "heroku-prebuild": "tsc",
+    "start": "node dist/app.js",
+    "test": "echo \"Error: no test specified\" "
   },
-  "author": "",
-  "license": "ISC"
+  "author": "Stuart Himmer",
+  "license": "ISC",
+  "engines": {
+    "node": "12.12.x",
+    "npm": "6.11.x"
+  }
 }
