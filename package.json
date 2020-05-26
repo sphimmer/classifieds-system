@@ -2,7 +2,7 @@
   "name": "graph_api",
   "version": "0.1.0",
   "description": "",
-  "main": "src/app.js",
+  "main": "dist/app.js",
   "dependencies": {
     "apollo-server-koa": "^2.13.1",
     "dotenv": "^8.2.0",
