@@ -29,7 +29,8 @@
     "@types/node": "^13.13.4"
   },
   "scripts": {
-    "heroku-prebuild": "tsc",
+    "heroku-prebuild": "npm install typescript",
+    "heroku-build": "tsc",
     "start": "node dist/app.js",
     "test": "echo \"Error: no test specified\" "
   },
