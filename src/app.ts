@@ -32,10 +32,11 @@ async function main() {
   const schema = await buildSchema({
     resolvers: [CategoryResolver, LocationResolver, UserResolver, ListingResolver],
     container: Container,
-    nullableByDefault: true
+    nullableByDefault: true,
+    
   });
 
-  const server = new ApolloServer({ schema })
+  const server = new ApolloServer({ schema, introspection: true, playground: true })
 
   /** Routes */
   app.use( router.routes() ).use( router.allowedMethods() );
