@@ -1,0 +1,397 @@
+@import '~codyhouse-framework/main/assets/css/base'; 
+@import '~codyhouse-framework/main/assets/css/style';
+@import '../static/styles/footer.scss';
+@import '../static/styles/_1_product_card.scss';
+@import '../static/styles/radio_buttons.scss';
+@import '../static/styles/1_sub-navigation';
+@import '../static/styles/1_custom-select';
+// @import '../static/styles/solid.scss';
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Raleway:wght@300;400;700;900&display=swap');
+/* -------------------------------- 
+
+File#: _2_flexi-header
+Title: Flexi Header
+Descr: Customizable header template
+Usage: codyhouse.co/license
+
+-------------------------------- */
+
+:root {
+  
+  @include defineColorHSL(--color-success, 94, 48%, 56%);
+  @include defineColorHSL(--color-error, 355, 90%, 61%);
+  @include defineColorHSL(--color-warning, 46, 100%, 61%);
+  @include defineColorHSL(--color-primary-darker, 220, 90%, 36%);
+  @include defineColorHSL(--color-primary-dark, 220, 90%, 46%);
+  @include defineColorHSL(--color-primary, 0, 0%, 38%);
+  
+  @include defineColorHSL(--color-primary-light, 220, 90%, 66%);
+  @include defineColorHSL(--color-primary-lighter, 220, 90%, 76%);
+  @include defineColorHSL(--color-cta, 91, 39%, 57%);
+  @include defineColorHSL(--color-accent-darker, 355, 90%, 41%);
+  @include defineColorHSL(--color-accent-dark, 355, 90%, 51%);
+  @include defineColorHSL(--color-accent, 355, 90%, 61%);
+  @include defineColorHSL(--color-accent-light, 355, 90%, 71%);
+  @include defineColorHSL(--color-accent-lighter, 355, 90%, 81%);
+  --font-primary: 'Raleway', Helvetica, sans-serif;
+  --font-secondary: 'Open Sans', sans-serif;;
+
+    --f-header-height: 50px;
+    --f-header-logo-width: 104px;
+  
+    @include breakpoint(md) {
+      --f-header-height: 70px;
+    }
+  }
+
+  
+  $color-font: #606060;
+  $color-container:#e2e2e1;
+  $color-cta: #90bc68;
+  
+
+  header {
+    border-bottom: 1px solid $color-container;
+    color: var(--color-primary);
+    font-size: var(--text-sm);
+  }
+
+  .header-border{
+    border-left: 1px solid $color-container;
+  }
+
+  .btn-cta{
+    background-color: $color-cta;
+    color: var(--color-white);
+  }
+
+  .header-search-control{
+    padding-top: var(--form-control-padding-y, 0.5em);
+    padding-bottom: var(--form-control-padding-y, 0.5em);
+    padding-left: var(--form-control-padding-x, 0.75em);
+    padding-right: var(--form-control-padding-x, 0.75em);
+    border-radius: var(--form-control-radius, 0.25em);
+    background-color: transparent;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    color: inherit;
+    line-height: inherit;
+    padding-left: var(--search-input-btn-width);
+  }
+  .f-header {
+    height: var(--f-header-height);
+    width: 100%;
+    z-index: var(--zindex-header);
+    margin-bottom: var(--space-lg);
+    margin-top: var(--space-sm);
+  }
+
+  .contain-highlight{
+    background-color: $color-container;
+  }
+  
+  .f-header--expanded {
+    // class added when navigation is visible - small devices only
+  }
+  
+  .f-header__mobile-content { // logo + menu button on small devices
+    position: relative;
+    display: flex;
+    height: 100%;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 2;
+  }
+  
+  .f-header__logo {
+    display: block;
+    width: var(--f-header-logo-width);
+    flex-shrink: 0;
+    text-decoration: none;
+  
+    svg, img {
+      display: block;
+    }
+  }
+  
+  .f-header__nav-control { // menu button
+    --anim-menu-btn-size: 40px;
+    // 🍔 icon
+    --anim-menu-btn-icon-size: 28px;
+    --anim-menu-btn-icon-stroke: 2px;
+  }
+  
+  .f-header__nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-height: 100vh;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 0 0 var(--space-md);
+    background-color: var(--color-bg);
+    box-shadow: var(--shadow-md);
+    font-size: var(--text-md); // edit font size of all nav elements
+    z-index: 1;
+  
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-1em);
+  
+    &::before { // top header bg + border
+      content: '';
+      display: block;
+      position: sticky;
+      top: 0;
+      height: var(--f-header-height);
+      background-color: inherit;
+      border-bottom: 1px solid var(--color-contrast-lower);
+    }
+  }
+  
+  .f-header__nav--is-visible {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+    transition: visibility 0s, opacity .3s, transform .3s;
+  }
+  
+  .f-header__nav-logo-wrapper {
+    display: none; // hide logo nav on small devices
+  }
+  
+  .f-header__item {
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--color-contrast-lower);
+  }
+  
+  .f-header__dropdown-icon {
+    display: none; // hide dropdown arrow on smaller screens
+  }
+  
+  .f-header__link,
+  .f-header__dropdown-link {
+    display: block;
+    display: flex;
+    align-items: center; // align icon with text
+    color: var(--color-primary);
+    text-decoration: none;
+    padding: var(--space-xs) 0;
+  
+    &:hover,
+    &[aria-current="page"] {
+      color: var(--color-contrast-high);
+    }
+  
+    .icon {
+      flex-shrink: 0;
+    }
+  }
+  
+  .f-header__btn,
+  .f-header__form-control {
+    width: 100%;
+    margin: var(--space-xs) 0;
+  }
+  
+  .f-header__dropdown { // sub navigation
+    padding-left: var(--space-md); // offset sub nav
+  }
+  
+  @include breakpoint(md) {
+    .f-header__mobile-content {
+      display: none; // hide logo + menu (mobile content)
+    }
+  
+    .f-header__nav {
+      // reset
+      position: static;
+      padding: 0;
+      background-color: transparent;
+      box-shadow: none;
+      visibility: visible;
+      opacity: 1;
+      transform: translateY(0);
+      transition: none;
+      max-height: none;
+      overflow: visible;
+      overscroll-behavior: auto;
+  
+      // new style
+      height: var(--f-header-height);
+      font-size: 0.875em; // edit font size of all nav elements
+  
+      &::before { // reset
+        display: none;
+      }
+    }
+  
+    .f-header__nav-logo-wrapper {
+      display: block; // fallback
+      display: flex;
+    }
+  
+    .f-header__nav-grid,
+    .f-header__list {
+      display: flex;
+      align-items: center;
+    }
+  
+    .f-header__nav-grid {
+      height: 100%;
+    }
+  
+    .f-header__item {
+      display: inline-block; // fallback
+      position: relative;
+      border-bottom: none;
+      margin-right: var(--space-xs); // margin between nav items
+  
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+  
+    .f-header__dropdown-icon {
+      display: block;
+      margin-left: var(--space-xxxxs);
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+    }
+  
+    .f-header__link {
+      padding: var(--space-xxxs) var(--space-xxs);
+    }
+  
+    .f-header__link--icon {
+      span {
+        display: none;
+      }
+    }
+  
+    .f-header__btn,
+    .f-header__form-control {
+      margin: 0; // reset
+    }
+  
+    .f-header__dropdown {
+      font-size: 1rem;
+      position: absolute;
+      top: 100%;
+      width: 200px;
+      left: calc(50% - 100px);
+      padding: var(--space-xxxs) 0;
+      background-color: var(--color-bg);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      z-index: var(--zindex-popover);
+  
+      // hide
+      visibility: hidden;
+      opacity: 0;
+      transition: visibility .2s .2s, opacity .2s 0s;
+  
+      .f-header__item:hover & {
+        visibility: visible;
+        opacity: 1;
+        transition: visibility .2s 0s, opacity .2s 0s;
+      }
+    }
+  
+    .f-header__dropdown-link {
+      color: var(--color-contrast-high);
+      padding: var(--space-xs) var(--space-sm);
+  
+      &:hover {
+        background-color: var(--color-contrast-lower);
+      }
+    }
+  }
+  
+  html:not(.js) {
+    .f-header__nav-control {
+      display: none;
+    }
+  
+    .f-header__nav {
+      position: static;
+      padding: var(--space-xxs) 0 var(--space-md);
+      box-shadow: none;
+      visibility: visible;
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* -------------------------------- 
+
+File#: _1_search-input
+Title: Search input
+Descr: Search input field with custom button
+Usage: codyhouse.co/license
+
+-------------------------------- */
+
+:root {
+    --search-input-btn-width: 2.8em;
+    --search-input-icon-size: 1.25em;
+  }
+  
+  .search-input {
+    position: relative;
+  
+    .form-control::-webkit-search-decoration {
+      -webkit-appearance: none;
+    }
+  }
+  
+  .search-input--icon-right .form-control {
+    padding-right: var(--search-input-btn-width);
+  }
+  
+  .search-input--icon-left .form-control {
+    padding-left: var(--search-input-btn-width);
+  }
+  
+  .search-input__btn {
+    @include reset;
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: var(--search-input-btn-width);
+  
+    &:active .icon {
+      transform: scale(0.9);
+    }
+  
+    .icon {
+      display: block;
+      width: var(--search-input-icon-size);
+      height: var(--search-input-icon-size);
+      margin-left: auto;
+      margin-right: auto;
+      color: var(--color-contrast-low); // icon color
+      transition: transform 0.2s;
+    }
+  }
+  
+  .search-input--icon-left .search-input__btn {
+    left: 0;
+    right: auto;
+    pointer-events: none;
+  }
+  
+  .search-input__btn:focus .icon,
+  .search-input .form-control:focus + .search-input__btn .icon {
+    color: var(--color-primary); // active icon color
+  }
+
+  
