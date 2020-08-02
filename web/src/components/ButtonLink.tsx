@@ -11,7 +11,6 @@ export class ButtonLink extends React.Component<IButtonLinkProps> {
 
     children:any;
     constructor(props: IButtonLinkProps){
-        console.log(props)
         super(props)
         this.to = props.to;
         this.children = props.children;

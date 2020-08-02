@@ -1,32 +1,48 @@
-import * as React from "react";
-import { SearchBar } from "./searchbar";
+
 import { ICategory } from "entities/ICategory";
 import { Logo } from "./Logo";
 import { AccountLinks } from "./AccountLinks";
 import { Link } from "react-router-dom";
-import { ButtonLink } from "./ButtonLink";
 import { HeaderSearchField } from "./HeaderSearchField";
 import { Size } from "enums/Size";
 import { Pages } from "enums/Pages";
+import { MegaMenuCategories } from "./MegaMenuCategories";
+import React, { MouseEvent } from "react";
+
 
 
 
 interface IHeaderProps {
     categories: ICategory[];
+    loggedIn?: boolean;
 }
 
-export class Header extends React.Component<IHeaderProps> {
-    categories: ICategory[];
+interface IHeaderState {
+    showCategoryMenu: boolean;
+}
+
+export class Header extends React.Component<IHeaderProps, IHeaderState> {
+
+    state: IHeaderState = {
+        showCategoryMenu: false
+    }
 
     constructor(props: IHeaderProps) {
         super(props)
-        this.categories = props.categories;
+
+        this.toggleCategoryMenu = this.toggleCategoryMenu.bind(this);
+    }
+
+    toggleCategoryMenu(event: MouseEvent<HTMLAnchorElement>) {
+        event.preventDefault();
+        this.setState({showCategoryMenu: !this.state.showCategoryMenu});
     }
 
     componentDidMount() {
         let frontEnd = document.createElement('script');
         frontEnd.src = '/static/_2_flexi-headers.js'; // 👈 make sure to use the correct path
         frontEnd.id = '_2_flexi-header';
+        frontEnd.type = "JavaScript";
         document.body.appendChild(frontEnd);
     }
 
@@ -38,75 +54,28 @@ export class Header extends React.Component<IHeaderProps> {
             <header className="margin-bottom-md" >
                 <div className="container grid text-component max-width-lg">
                     <div className="col-2@md padding-y-xs padding-x-sm">
-                        <Logo size={Size.sm}/>
+                        <Logo size={Size.sm} />
                     </div>
                     <div className="col-3@md header-border padding-top-sm padding-x-sm grid">
-                        <HeaderSearchField/>
+                        <HeaderSearchField />
                     </div>
                     <div className="col-2@md header-border padding-top-sm padding-x-sm grid">
-                        <a href="#0" className="f-header__link">
+                        <a href="#categories" onClick={this.toggleCategoryMenu} className="f-header__link">
                             <span>Categories</span>
                             <svg className="f-header__dropdown-icon icon" aria-hidden="true" viewBox="0 0 12 12">
                                 <path d="M6,9l4-5H2Z" /></svg>
                         </a>
-
-                        <ul className="f-header__dropdown">
-                            {this.categories.map((category) => {
-                                return <li key={category.id}><a href="#0" className="f-header__dropdown-link">{category.name}</a></li>
-                            })}
-
-                        </ul>
                     </div>
                     <div className="col-2@md padding-top-sm header-border padding-x-sm grid">
                         <Link to={Pages.CREATE_LISTING} className="f-header__link">+ Create Listing</Link>
 
                     </div>
                     <div className="col-3@md padding-top-sm header-border padding-x-sm grid">
-                        <AccountLinks />
+                        <AccountLinks loggedIn={this.props.loggedIn ? true : false}/>
                     </div>
                 </div>
+                <MegaMenuCategories isVisible={this.state.showCategoryMenu} categories={this.props.categories} />
             </header>
-            // <header className="f-header js-f-header position-relative grid">
-            //     <div className="f-header__mobile-content container max-width-lg">
-            //         <div className="col-3@md">
-            //             <Logo />
-            //         </div>
-
-
-            //         <button className="reset anim-menu-btn js-anim-menu-btn f-header__nav-control js-tab-focus" aria-label="Toggle menu">
-            //             <i className="anim-menu-btn__icon anim-menu-btn__icon--close" aria-hidden="true"></i>
-            //         </button>
-            //     </div>
-
-            //     <div className="f-header__nav" role="navigation">
-            //         <div className="f-header__nav-grid justify-between@md container max-width-lg">
-            //             <div className="f-header__nav-logo-wrapper flex-grow flex-basis-0">
-            //                 <Logo />
-            //             </div>
-
-            //             <ul className="f-header__list flex-grow flex-basis-0 justify-center@md">
-            //                 <li className='f-header__item'><SearchBar search=""></SearchBar></li>
-            //                 <li className="f-header__item"><ButtonLink to="/account/listings/create" >+ Create Listing</ButtonLink></li>
-            //                 <li className="f-header__item"><a href="#0" className="f-header__link">
-            //                     <span>Categories</span>
-            //                     <svg className="f-header__dropdown-icon icon" aria-hidden="true" viewBox="0 0 12 12">
-            //                         <path d="M6,9l4-5H2Z" /></svg>
-            //                 </a>
-
-            //                     <ul className="f-header__dropdown">
-            //                         {this.categories.map((category) => {
-            //                             return <li key={category.id}><a href="#0" className="f-header__dropdown-link">{category.name}</a></li>
-            //                         })}
-
-            //                     </ul>
-            //                 </li>
-
-            //             </ul>
-
-            //             <AccountLinks />
-            //         </div>
-            //     </div>
-            // </header>
         )
     }
 }

@@ -1,7 +1,9 @@
+import "reflect-metadata";
+import { Container } from 'typedi';
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import "styles.scss";
-import { BrowserRouter, Switch, Route, Redirect } from "react-router-dom";
+import { BrowserRouter, Switch } from "react-router-dom";
 import { Home } from "pages/Home";
 import { Login } from "pages/account/Login";
 import { SignUp } from "pages/account/SignUp";
@@ -11,40 +13,24 @@ import { CategoryService } from "api/CategoryService";
 import { MyListings } from "pages/account/MyListings";
 import { CreateListing } from "pages/account/CreateListing";
 import { ListingService } from "api/ListingService";
-import { getUser } from "util/session";
 import { Pages } from "enums/Pages";
-import { LocationService } from "api/LocationService";
 import { AccountOverview } from "pages/account/AccountOverview";
-
-const PageRoute = ({ component: Component, isAuth, ...rest }: any) => (
-    <Route
-        {...rest}
-        render={props =>
-            <Component {...props} {...rest} />
-        }
-    />
-);
+import { PrivateRoute } from "components/routes/PrivateRoute";
+import { PageRoute } from "components/routes/PageRoute";
 
 
 
-const PrivateRoute = ({ component: Component, ...rest }: any) => (
-    <Route {...rest} render={(props) => (
-      getUser()
-        ? <Component {...props} {...rest} />
-        : <Redirect to={Pages.LOGIN + '?error=Please log in to continue'} />
-    )} />
-  )
 
 ReactDOM.render(
     <BrowserRouter>
         <Switch>
             <PageRoute exact path={Pages.HOME} component={Home} />
-            <PrivateRoute exact path={Pages.ACCOUNT} component={AccountOverview} accountService={new AccountService()} categoryService={new CategoryService()} />
-            <PrivateRoute exact path={Pages.PROFILE} component={MyProfile} accountService={new AccountService()} categoryService={new CategoryService()} />
-            <PrivateRoute exact path={Pages.MY_LISTINGS} component={MyListings} accountService={new AccountService()} categoryService={new CategoryService()} listingService={new ListingService()}/>
-            <PrivateRoute exact path={Pages.CREATE_LISTING} component={CreateListing}  accountService={new AccountService()} categoryService={new CategoryService()} listingService={new ListingService}/>
-            <PageRoute exact path={Pages.LOGIN}  component={Login} accountService={new AccountService()} categoryService={new CategoryService()}/>
-            <PageRoute exact path={Pages.SIGNUP} component={SignUp} accountService={new AccountService()} categoryService={new CategoryService()}/>
+            <PrivateRoute exact path={Pages.ACCOUNT} component={AccountOverview} accountService={Container.get(AccountService)} categoryService={Container.get(CategoryService)} />
+            <PrivateRoute exact path={Pages.PROFILE} component={MyProfile} accountService={Container.get(AccountService)} categoryService={Container.get(CategoryService)} />
+            <PrivateRoute exact path={Pages.MY_LISTINGS} component={MyListings} accountService={Container.get(AccountService)} categoryService={Container.get(CategoryService)} listingService={Container.get(ListingService)} />
+            <PrivateRoute exact path={Pages.CREATE_LISTING} component={CreateListing} accountService={Container.get(AccountService)} categoryService={Container.get(CategoryService)} listingService={Container.get(ListingService)} />
+            <PageRoute exact path={Pages.LOGIN} component={Login} accountService={Container.get(AccountService)} categoryService={Container.get(CategoryService)} />
+            <PageRoute exact path={Pages.SIGNUP} component={SignUp} accountService={Container.get(AccountService)} categoryService={Container.get(CategoryService)} />
         </Switch>
     </BrowserRouter>,
     document.getElementById("root")

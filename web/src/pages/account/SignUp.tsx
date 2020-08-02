@@ -2,12 +2,9 @@ import React, { FormEvent, ChangeEvent } from "react";
 import { IUser } from "entities/IUser";
 import { AccountService } from "api/AccountService";
 import { Link, Redirect } from "react-router-dom";
-import { Logo } from "components/Logo";
 import { Status } from "enums/Status";
-import { stat } from "fs";
 import { TextInput } from "components/form-components/TextInput";
 import { Button } from "components/form-components/Button";
-import { Size } from "enums/Size";
 import { CategoryService } from "api/CategoryService";
 import { ICategory } from "entities/ICategory";
 import { Header } from "components/header";
@@ -20,6 +17,7 @@ interface ISignUpState {
     canSubmit: boolean;
     formError: string;
     status: Status
+    categories: ICategory[]
 }
 
 interface ISignUpProps {
@@ -44,9 +42,10 @@ export class SignUp extends React.Component<ISignUpProps, ISignUpState> {
         },
         canSubmit: true,
         formError: null!,
-        status: Status.LOADING
+        status: Status.LOADING,
+        categories: []
     }
-    categories: ICategory[] = [];
+    
 
     constructor(props: ISignUpProps) {
         super(props);
@@ -59,9 +58,9 @@ export class SignUp extends React.Component<ISignUpProps, ISignUpState> {
     }
 
     async componentDidMount() {
-        this.categories = await this.props.categoryService.getCategories()
+        this.state.categories = await this.props.categoryService.getCategories()
         this.state.status = Status.LOADED;
-
+        this.setState(this.state);
     }
 
     async submitForm(event: FormEvent<HTMLElement>) {
@@ -183,14 +182,14 @@ export class SignUp extends React.Component<ISignUpProps, ISignUpState> {
         } else {
             return (
                 <div>
-                    <Header categories={this.categories}/>
+                    <Header categories={this.state.categories} />
                     <div className="container max-width-sm grid text-component padding-y-lg">
 
                         <form className="sign-up-form" onSubmit={this.submitForm}>
                             <div className="text-component text-center margin-bottom-sm">
                                 <h1>Create an account</h1>
                                 <p>Create an account to unlock all the features including creating listings and contacting sellers</p>
-                            <p>Already have an account? <Link to={Pages.LOGIN}>Login</Link></p>
+                                <p>Already have an account? <Link to={Pages.LOGIN}>Login</Link></p>
                             </div>
 
                             {/* <div className="grid gap-xs">
@@ -273,7 +272,7 @@ export class SignUp extends React.Component<ISignUpProps, ISignUpState> {
                             </div>
                         </form>
                     </div>
-                    <Footer categories={this.categories}/>
+                    <Footer categories={this.state.categories} />
                 </div>
             )
         }

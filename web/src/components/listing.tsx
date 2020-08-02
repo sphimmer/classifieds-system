@@ -13,7 +13,7 @@ export class Listing extends React.Component<IListingProps> {
 
                 <a href="#0" className="prod-card__img-link" aria-label="Description of the link">
                     <figure className="prod-card__img media-wrapper media-wrapper--4:3">
-                        <img src={this.props.listing.images[0].path} alt={this.props.listing.title} />
+                        <img src={this.props.listing.thumbnailImage ? this.props.listing.thumbnailImage: ""} alt={this.props.listing.title} />
                     </figure>
                 </a>
 

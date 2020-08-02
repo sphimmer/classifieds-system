@@ -63,4 +63,10 @@ export class User implements IUser{
     @DeleteDateColumn({ type: "timestamptz" })
     dateDeleted: Timestamp;
 
+    @Field(() => String)
+    @Column({ type: 'varchar', nullable: true })
+    refreshToken: string;
+
+    @Column({ type: "timestamptz", nullable: true })
+    refreshTokenExpiration: Timestamp;
 }

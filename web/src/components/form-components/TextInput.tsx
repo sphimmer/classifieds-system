@@ -15,10 +15,6 @@ interface ITextInputProps {
 
 export class TextInput extends React.Component<ITextInputProps>{
 
-    constructor(props: ITextInputProps) {
-        super(props)
-    }
-
     render() {
         return (
             <div className={this.props.divClass}>

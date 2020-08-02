@@ -17,14 +17,13 @@ import { ListingCondition } from "enums/ListingCondition";
 import ImageUploader from "react-images-upload";
 import { Redirect } from "react-router-dom";
 import { Pages } from "enums/Pages";
-
-
-
+import { ILocalStorage } from "entities/ILocalStorage";
 
 interface ICreateListingProps {
     accountService: AccountService;
     categoryService: CategoryService;
     listingService: ListingService;
+    session: ILocalStorage;
 }
 
 interface ICreateListingState {
@@ -67,8 +66,14 @@ export class CreateListing extends React.Component<ICreateListingProps, ICreateL
     }
 
     async componentDidMount() {
+        
         this.state.categories = await this.categoryService.getCategories();
-        this.state.status = Status.LOADED;
+        
+        if (!this.props.session) {
+            this.state.status = Status.NOT_AUTHENTICATED;
+        } else {
+            this.state.status = Status.LOADED;
+        }
         this.setState(this.state)
     }
 
@@ -206,13 +211,13 @@ export class CreateListing extends React.Component<ICreateListingProps, ICreateL
         if (this.state.status == Status.LOADED) {
             return (
                 <div>
-                    <Header categories={this.state.categories} />
+                    <Header categories={this.state.categories} loggedIn={this.props.session ? true : false}/>
                     <AccountNav activePage={AccountNavSubPage.LISTING} />
                     <form className="sign-up-form" >
                         <div className="container max-width-sm">
                             <div className="margin-bottom-sm">
                                 <div className="grid gap-md">
-                                    <h4 className="margin-top-sm">Post An Item for Sale</h4>
+                                    <h4 className="padding-y-sm">Post An Item for Sale</h4>
 
                                     <TextInput
                                         label="Listing Title"
@@ -277,8 +282,16 @@ export class CreateListing extends React.Component<ICreateListingProps, ICreateL
             )
         } else if (this.state.status === Status.SUCCESS){
             return <Redirect to={Pages.MY_LISTINGS}/>
-        }else {
-            return <div>Loading...</div>
+        }else if (this.state.status == Status.NOT_AUTHENTICATED) {
+            return <Redirect to={Pages.LOGIN + "?error=Please Login to create a listing."}/>
+        } else {
+            return (
+                <div>
+                    <Header categories={[]} />
+                    <AccountNav activePage={AccountNavSubPage.LISTING} />
+                    <Footer categories={[]} />
+                </div>
+            )
         }
     }
 }

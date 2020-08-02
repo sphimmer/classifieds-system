@@ -1,6 +1,9 @@
+import 'reflect-metadata';
+import { Service} from 'typedi';
 import { APIService } from "./APIService";
 import { ILocation } from "entities/ILocation";
 
+@Service()
 export class LocationService extends APIService {
     public async getLocations(): Promise<ILocation[]> {
         const body = {

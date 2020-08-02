@@ -49,6 +49,14 @@ Usage: codyhouse.co/license
   $color-container:#e2e2e1;
   $color-cta: #90bc68;
   
+  .Absolute-Center {
+    display: flex; // make us of Flexbox
+    justify-content: center; // horizontally centers single line items
+
+    margin: auto;
+    left: 0; right: 0;
+  }  
+  
 
   header {
     border-bottom: 1px solid $color-container;

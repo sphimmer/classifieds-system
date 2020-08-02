@@ -13,4 +13,5 @@ export interface IUser{
     dateCreated?: string;
     accountType?: AccountType;
     listings?: IListing[];
+    refreshToken?: string;
 }

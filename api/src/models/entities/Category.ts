@@ -31,7 +31,7 @@ export class Category implements ICategory{
      * @inheritdoc
      */
     @Field(() => [Listing])
-    @OneToMany((type) => Listing, (listing) => listing.category)
+    @OneToMany((type) => Listing, (listing) => listing.category, {eager: true})
     listings: IListing[]
 
     /**

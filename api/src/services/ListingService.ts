@@ -13,6 +13,7 @@ import S3 from 'aws-sdk/clients/s3';
 import { v4 as uuidv4 } from 'uuid';
 import { IFile } from "../interfaces/IFile";
 import { ValidationError } from "apollo-server-koa";
+import { Category } from "../models/entities/Category";
 
 
 export class ListingService implements IListingService {
@@ -46,10 +47,11 @@ export class ListingService implements IListingService {
     async createListing(data: IListingRequest, userId: string): Promise<IListing> {
         const listing = data.toEntity(userId);
         const newListing = await this.repo.save(listing);
-        await this.updateFullTextSearchDocument(newListing);
+        let fullListing = await this.repo.findOne(newListing.id, { relations: ['category'] })
+        await this.updateFullTextSearchDocument(fullListing);
         listing.images = await this.saveListingImages(data.images, newListing);
 
-        const fullListing = await this.repo.findOne(newListing.id, { relations: ['images', 'user'] })
+        fullListing = await this.repo.findOne(newListing.id, { relations: ['images', 'user', 'category'] })
         fullListing.images = listing.images;
         console.log(fullListing)
         return fullListing
@@ -71,28 +73,44 @@ export class ListingService implements IListingService {
     }
 
     private async updateFullTextSearchDocument(listing: Listing): Promise<boolean> {
+        try {
+            const result = await this.repo.query(`
+                UPDATE "listing" 
+                SET "document" = setweight(to_tsvector(title), 'A') || setweight(to_tsvector(category.name), 'B') || setweight(to_tsvector(description), 'C')
+                , "dateUpdated" = CURRENT_TIMESTAMP 
+                FROM category 
+                WHERE listing.id = $1
+                AND category.id = $2
+            `, [listing.id, listing.category.id]);
+            // createQueryBuilder()
+            //     .from('category', 'category')
+            //     .update(listing)
+            //     .set({ document: () => `setweight(to_tsvector(title), 'A') || setweight(to_tsvector(categor.name), 'B') || setweight(to_tsvector(description), 'C')` })
+            //     .where("id = :id", { id: listing.id })
+            //     .execute();
+            console.log(result)
+            return result.affected == 1;
+        } catch (error) {
+            console.error(error)
+            throw error;
+        }
 
-        const result = await this.repo.createQueryBuilder()
-            .update()
-            .set({ document: () => "setweight(to_tsvector(title), 'A') || setweight(to_tsvector(description), 'B')" })
-            .execute();
-        return result.affected == 1;
     }
 
-    public async getSignedUrls(files: IFile[], userId: string): Promise<SignedURL[]>{
+    public async getSignedUrls(files: IFile[], userId: string): Promise<SignedURL[]> {
         const signedUrls: SignedURL[] = files.map(file => {
             if (!file.contentType.includes('image/')) {
                 throw new ValidationError("Invalid file type. Must be an image.")
             }
             const image_name_pad = uuidv4();
-            const params = {Bucket: process.env.S3_BUCKET, Key: `${userId}/${image_name_pad}-${file.fileName}`, Expires: 120, ContentType: file.contentType};
+            const params = { Bucket: process.env.S3_BUCKET, Key: `${userId}/${image_name_pad}-${file.fileName}`, Expires: 120, ContentType: file.contentType };
             const signedUrl = new SignedURL();
             signedUrl.URL = this.s3Client.getSignedUrl('putObject', params);
             signedUrl.fileName = file.fileName;
             return signedUrl;
         });
         return signedUrls
-        
+
     }
 
 

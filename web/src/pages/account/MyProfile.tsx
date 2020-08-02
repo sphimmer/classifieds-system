@@ -41,7 +41,7 @@ export class MyProfile extends React.Component<IAccountProps, IAccountState>{
     async componentDidMount() {
         try {
             const categoryResponse = await this.categoryService.getCategories();
-            const user: ILocalStorage | null = getUser();
+            const user: ILocalStorage | null = await getUser();
             if (user) {
                 const userResponse = await this.accountService.getFullProfile(user);
                 this.setState({ categories: categoryResponse, status: Status.LOADED, user: userResponse })
@@ -98,12 +98,12 @@ export class MyProfile extends React.Component<IAccountProps, IAccountState>{
             return (
 
                 <div>
-                    <Header categories={this.state.categories} />
+                    <Header categories={this.state.categories} loggedIn={this.props.session ? true : false}/>
                     <AccountNav activePage={AccountNavSubPage.EDIT_PROFILE} />
                     <div className="container grid max-width-sm">
                         <div className="margin-bottom-sm">
-                            <div className="grid gap-md">
-                                <h3 className="margin-top-md">Edit My Profile </h3>
+                            <div className="grid gap-md text-sm">
+                                <h4 className="padding-y-sm">Edit My Profile </h4>
                                 <TextInput
                                     label="First Name"
                                     name="firstname"
@@ -186,8 +186,11 @@ export class MyProfile extends React.Component<IAccountProps, IAccountState>{
             )
         } else if (this.state.status == Status.LOADING) {
             return (
-
-                <div>Loading...</div>
+                <div>
+                    <Header categories={[]} />
+                    <AccountNav activePage={AccountNavSubPage.EDIT_PROFILE} />
+                    <Footer categories={[]} />
+                </div>
             )
         } else if (this.state.status == Status.NOT_AUTHENTICATED) {
             clearUserSession();

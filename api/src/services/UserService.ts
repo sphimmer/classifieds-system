@@ -26,6 +26,16 @@ export class UserService implements IUserService {
         this.connection = Container.get("connection");
         this.repo = this.connection.getRepository(User);
     }
+
+    async setRefreshToken(userId: string, refreshToken: string): Promise<boolean> {
+        const rt = await hashPassword(refreshToken)
+        const dt1 = new Date();
+        const dt2 = new Date(dt1);
+        dt1.setMinutes(dt2.getMinutes() + 10);
+        const response = await this.repo.update({id: userId}, {refreshToken: rt, refreshTokenExpiration: dt1});
+        return response.affected == 1;
+
+    }
     
     /**
      * @inheritdoc

@@ -33,7 +33,8 @@ export class CategoryService implements ICategoryService{
      * @inheritdoc
      */
     public async getCategoryById(id: string): Promise<Category>{
-        const category = await this.repo.findOne(id, {relations: ['subcategories', 'parentCategory', 'listings']})
+        const category = await this.repo.findOne(id, {relations: ['subcategories']});
+        console.log(category)
         return category;
     }
 

@@ -1,33 +1,29 @@
 import React from "react";
-import { IUser } from "entities/IUser";
 import { Status } from "enums/Status";
 import { Link } from "react-router-dom";
-import { getUser } from "util/session";
 import { Pages } from "enums/Pages";
 
 interface IAccountLinksState {
-    user?: IUser,
     status: Status
 }
 
 interface IAccountLinksProps {
-
+    loggedIn: boolean,
 }
 
 export class AccountLinks extends React.Component<IAccountLinksProps, IAccountLinksState>{
-    state: IAccountLinksState;
+    state: IAccountLinksState = { status: Status.LOADING };
 
-    constructor(props: IAccountLinksProps) {
-        super(props)
-        const localStorageData = getUser();
+    async componentDidMount() {
+
         this.state = {
-            user: localStorageData ? localStorageData.user : undefined,
+
             status: Status.LOADED
         }
+        this.setState(this.state);
     }
-
     render() {
-        if (this.state.user) {
+        if (this.props.loggedIn) {
             return (
 
                 <nav className="col-12@md padding-y-sm grid padding-x-sm">
@@ -38,13 +34,13 @@ export class AccountLinks extends React.Component<IAccountLinksProps, IAccountLi
         } else {
             return (
                 <>
-                <nav className="col-6@xs padding-y-sm grid ">
+                    <nav className="col-6@xs padding-y-sm grid ">
 
-                    <Link to={Pages.LOGIN} className="f-header__link">Login</Link>
-                </nav>
-                <nav className="col-6@xs padding-y-sm grid ">
-                    <Link to={Pages.SIGNUP} className="f-header__link">Sign Up</Link>
-                </nav>
+                        <Link to={Pages.LOGIN} className="f-header__link">Login</Link>
+                    </nav>
+                    <nav className="col-6@xs padding-y-sm grid ">
+                        <Link to={Pages.SIGNUP} className="f-header__link">Sign Up</Link>
+                    </nav>
                 </>
             )
         }

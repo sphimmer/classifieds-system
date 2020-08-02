@@ -7,9 +7,6 @@ interface IButtonProps {
 }
 
 export class Button extends React.Component<IButtonProps> {
-    constructor(props: IButtonProps) {
-        super(props);
-    }
 
     render() {
         return (

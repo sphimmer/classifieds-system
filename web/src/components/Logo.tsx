@@ -16,7 +16,7 @@ export class Logo extends React.Component<ILogoProps> {
     render() {
         return (
             < Link to={Pages.HOME} className={this.props.size < Size.lg ? "f-header__logo" : "f-footer__logo" } >
-                <img src="/images/logo-01.png" />
+                <img src="/images/logo-01.png" alt="Website Logo, links to home page"/>
             </ Link >
         )
     }

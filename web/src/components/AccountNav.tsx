@@ -1,8 +1,6 @@
 import React from "react";
 import { AccountNavSubPage } from "enums/AccountNavSubPage";
 import { Link } from "react-router-dom";
-import { Status } from "enums/Status";
-import { LoginStatus } from "enums/LoginStatus";
 import { Pages } from "enums/Pages";
 
 interface IAccountNavProps{
@@ -43,10 +41,10 @@ export class AccountNav extends React.Component<IAccountNavProps> {
                                 </button>
 
                                 <ul className="subnav__list">
-                                    <li className="subnav__item"><Link to={Pages.ACCOUNT} className="subnav__link" aria-current={this.activePage == AccountNavSubPage.OVERVIEW ? "page" : "false"}>My Account</Link></li>
-                                    <li className="subnav__item"><Link to={Pages.MY_LISTINGS} className="subnav__link" aria-current={this.activePage == AccountNavSubPage.LISTING ? "page" : "false"}>My Listings</Link></li>
-                                    <li className="subnav__item"><Link to={Pages.PROFILE} className="subnav__link" aria-current={this.activePage == AccountNavSubPage.EDIT_PROFILE ? "page" : "false"}>Edit Profile</Link></li>
-                                    <li className="subnav__item"><Link to={Pages.PROFILE} className="subnav__link" aria-current={this.activePage == AccountNavSubPage.CHANGE_PASSWORD ? "page" : "false"}>Change Password</Link></li>
+                                    <li className="subnav__item"><Link to={Pages.ACCOUNT} className="subnav__link" aria-current={this.activePage === AccountNavSubPage.OVERVIEW ? "page" : "false"}>My Account</Link></li>
+                                    <li className="subnav__item"><Link to={Pages.MY_LISTINGS} className="subnav__link" aria-current={this.activePage === AccountNavSubPage.LISTING ? "page" : "false"}>My Listings</Link></li>
+                                    <li className="subnav__item"><Link to={Pages.PROFILE} className="subnav__link" aria-current={this.activePage === AccountNavSubPage.EDIT_PROFILE ? "page" : "false"}>Edit Profile</Link></li>
+                                    <li className="subnav__item"><Link to={Pages.PROFILE} className="subnav__link" aria-current={this.activePage === AccountNavSubPage.CHANGE_PASSWORD ? "page" : "false"}>Change Password</Link></li>
                                     {/* <li className="subnav__item"><a href="#0" className="subnav__link">Favorites</a></li> */}
                                     
                                 </ul>

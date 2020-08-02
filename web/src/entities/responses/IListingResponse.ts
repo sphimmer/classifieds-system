@@ -11,5 +11,6 @@ export interface IListingResponse{
     category: ICategory;
     views?: number;
     images: { path: string }[];
+    thumbnailImage: string;
     user?: IUser;
 }

@@ -19,15 +19,30 @@ import { authChecker } from "./util/authChecker";
 import { IContext } from "./interfaces/IContext";
 import AWS from 'aws-sdk'
 
+
 async function main() {
   const PORT = process.env.PORT || 5000;
   const app = new Koa();
   const router = new KoaRouter();
 
   /** Middlewares */
-  app.use( json() );
-  app.use( logger() );
-  app.use( bodyParser() );
+  app.use(json());
+  app.use(logger());
+  app.use(bodyParser());
+  
+  const corsOptions = {
+    origin: 'http://localhost:3000',
+    credentials: true // <-- REQUIRED backend setting
+  };
+
+
+
+  const setCookie = () => {
+    return (ctx, next) => {
+      ctx.cookies.set('foo', 'bar');
+      next();
+    }
+  }
 
   const connection = await createConnection()
   var config = new AWS.Config({
@@ -41,31 +56,33 @@ async function main() {
     container: Container,
     authChecker: authChecker,
     nullableByDefault: true,
-    
   });
 
-  const server = new ApolloServer({ schema, introspection: true, playground: false, context: ({ctx}) :IContext => {
-    // get the user token from the headers
-    const headers = ctx.request.headers;
+  const server = new ApolloServer({
+    schema, introspection: true, playground: false, context: ({ctx} ): IContext => {
+      // get the user token from the headers
+      const headers = ctx.req.headers;
 
-    const token = headers['authorization'] ? headers['authorization'].split(' ')[1] : null;
-    return {token: token}
-    
-  }});
+      const token = headers['authorization'] ? headers['authorization'].split(' ')[1] : null;
+      return { token: token }
+
+    }
+  });
 
   /** Routes */
-  app.use( router.routes() ).use( router.allowedMethods() );
+  app.use(router.routes()).use(router.allowedMethods());
 
   server.applyMiddleware({ app });
 
   app.use(router.routes());
   app.use(router.allowedMethods());
+  app.use(setCookie())
   app.listen({ port: PORT }, () =>
     console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`)
   )
-  
+
 }
 
 main().catch((e) => {
- console.log(e);
+  console.log(e);
 });

@@ -38,7 +38,7 @@ export class SelectCategory extends React.Component<ISelectCategoryProps>{
     async selectSubCatecory(event: ChangeEvent<HTMLSelectElement>){
         const subCategoryId = event.target.value;
         this.state.subcategory = this.state.category!.subcategories!.filter((category) => {
-            return category.id == subCategoryId;
+            return category.id === subCategoryId;
         })[0];
         this.setState(this.state);
     }
@@ -73,7 +73,7 @@ export class SelectCategory extends React.Component<ISelectCategoryProps>{
                             <option></option>
                             {
                                 
-                                this.state.category != undefined ? this.state.category.subcategories!.map((category) => {
+                                this.state.category !== undefined ? this.state.category.subcategories!.map((category) => {
                                     return (
                                         <option value={category.id}>{category.name}</option>
                                     )

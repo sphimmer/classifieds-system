@@ -1,4 +1,5 @@
-
+import 'reflect-metadata';
+import { Service} from 'typedi';
 import { IUser } from "entities/IUser";
 import { APIService } from "./APIService";
 import { saveUser, getUser } from "util/session";
@@ -6,11 +7,9 @@ import { ILocalStorage } from "entities/ILocalStorage";
 import { UpdateUserRequest } from "entities/requests/UpdateUserRequest";
 require('dotenv').config()
 
-
+@Service()
 export class AccountService extends APIService {
-    constructor() {
-        super();
-    }
+
     public async createAccount(user: IUser): Promise<boolean> {
 
         const body = {
@@ -41,7 +40,7 @@ export class AccountService extends APIService {
         if (response.data.hasOwnProperty('errors')) {
             throw new Error(response.data.errors[0].extensions.code + ': ' + response.data.errors[0].message);
         }
-
+        
         saveUser({ jwt: response.data.data.createUser.jwt, user: response.data.data.createUser.user })
 
         return true;
@@ -62,6 +61,7 @@ export class AccountService extends APIService {
                       email
                       firstName
                       lastName
+                      refreshToken
                   }
                 }
               }
@@ -75,7 +75,7 @@ export class AccountService extends APIService {
         if (response.data.hasOwnProperty('errors')) {
             throw new Error(response.data.errors[0].extensions.code + ': ' + response.data.errors[0].message);
         }
-
+        console.log(response.headers['set-cookie'])
         saveUser({ jwt: response.data.data.login.jwt, user: response.data.data.login.user })
 
         return true;
@@ -109,17 +109,17 @@ export class AccountService extends APIService {
             `
         }
 
-        const response = await this.apiClient.post('/graphql', body, {headers: {'Authorization': 'Bearer ' + savedSession!  .jwt}});
+        const response = await this.apiClient.post('/graphql', body, { headers: { 'Authorization': 'Bearer ' + savedSession!.jwt } });
         if (response.data.hasOwnProperty('errors')) {
             throw new Error(response.data.errors[0].extensions.code + ': ' + response.data.errors[0].message);
         }
-        console.log(response);
+
         return response.data.data.me as IUser;
     }
 
-    public async updateMe(user: IUser): Promise<IUser>{
+    public async updateMe(user: IUser): Promise<IUser> {
         const updateUserRequest = new UpdateUserRequest(user);
-        const savedSession = getUser();
+        const savedSession = await getUser();
         const body = {
             query: `
             mutation($data: UserRequest!){
@@ -136,16 +136,48 @@ export class AccountService extends APIService {
                   }
                 }
               }`,
-              variables: {
-                  data: updateUserRequest
-              }
-            };
+            variables: {
+                data: updateUserRequest
+            }
+        };
 
-        const response = await this.apiClient.post('/graphql', body, {headers: {'Authorization': 'Bearer ' + savedSession!.jwt}});
+        const response = await this.apiClient.post('/graphql', body, { headers: { 'Authorization': 'Bearer ' + savedSession!.jwt } });
         if (response.data.hasOwnProperty('errors')) {
             throw new Error(response.data.errors[0].extensions.code + ': ' + response.data.errors[0].message);
         }
         console.log(response);
         return response.data.data.updateMe as IUser;
+    }
+
+    public async refreshSession(refreshToken: string, staleJwt: string): Promise<{jwt: string, freshUser: IUser}> {
+        const body = {
+            query: `
+              mutation ($data: RefreshRequest! ) {
+                refreshSession (
+                  data: $data
+                ) {
+                  jwt
+                  message
+                  user{
+                      id
+                      email
+                      firstName
+                      lastName
+                      refreshToken
+                  }
+                }
+              }
+            `,
+            variables: {
+                data: { refreshToken: refreshToken }
+            }
+        }
+        const response = await this.apiClient.post('/graphql', body, { headers: { 'Authorization': 'Bearer ' + staleJwt } });
+
+        if (response.data.hasOwnProperty('errors')) {
+            throw new Error(response.data.errors[0].extensions.code + ': ' + response.data.errors[0].message);
+        }
+
+        return { jwt: response.data.data.refreshSession.jwt, freshUser: response.data.data.refreshSession.user }
     }
 }

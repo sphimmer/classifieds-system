@@ -81,7 +81,7 @@ export class Listing implements IListing{
      * @inheritdoc
      */
     @Field(() => Category)
-    @ManyToOne((type) => Category, (category) => category.listings, {eager: true})
+    @ManyToOne((type) => Category, (category) => category.listings)
     category: ICategory;
 
 

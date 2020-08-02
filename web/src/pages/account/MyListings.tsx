@@ -7,18 +7,19 @@ import { Header } from "components/header";
 import { ICategory } from "entities/ICategory";
 import { Footer } from "components/footer";
 import { Status } from "enums/Status";
-import { Button } from "components/form-components/Button";
 import { ButtonLink } from "components/ButtonLink";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import { ListingService } from "api/ListingService";
 import { IListingResponse } from "entities/responses/IListingResponse";
 import { Listing } from "components/listing";
 import { Pages } from "enums/Pages";
+import { ILocalStorage } from "entities/ILocalStorage";
 
 interface IMyListingsProps {
     accountService: AccountService;
     categoryService: CategoryService;
     listingService: ListingService;
+    session: ILocalStorage;
 }
 
 interface IMyListingsState {
@@ -44,9 +45,17 @@ export class MyListings extends React.Component<IMyListingsProps, IMyListingsSta
     }
 
     async componentDidMount() {
-        this.state.categories = await this.categoryService.getCategories();
-        this.state.listings = await this.listingService.getMyListings();
-        this.state.status = Status.LOADED;
+        
+        
+        if (this.props.session) {
+            
+            this.state.categories = await this.categoryService.getCategories();
+            this.state.listings = await this.listingService.getMyListings();
+            this.state.status = Status.LOADED;
+        } else {
+            this.state.status = Status.NOT_AUTHENTICATED;
+        }
+        
         this.setState(this.state);
     }
 
@@ -54,7 +63,7 @@ export class MyListings extends React.Component<IMyListingsProps, IMyListingsSta
         if (this.state.status == Status.LOADED && this.state.listings.length == 0) {
             return (
                 <div>
-                    <Header categories={this.state.categories} />
+                    <Header categories={this.state.categories} loggedIn={this.props.session ? true : false}/>
                     <AccountNav activePage={AccountNavSubPage.LISTING} />
                     <div className="container grid max-width-sm">
                         <div className="margin-bottom-sm">
@@ -72,13 +81,13 @@ export class MyListings extends React.Component<IMyListingsProps, IMyListingsSta
         } else if (this.state.status == Status.LOADED && this.state.listings.length > 0) {
             return (
                 <div>
-                    <Header categories={this.state.categories} />
+                    <Header categories={this.state.categories} loggedIn={this.props.session ? true : false} />
                     <AccountNav activePage={AccountNavSubPage.LISTING} />
                     <div className="container grid max-width-sm">
                         <div className="margin-bottom-sm">
                             <div className="grid gap-md">
                                 <div className="col-6@sm">
-                                    <h4 className="margin-top-md">My Listings</h4>
+                                    <h4 className="padding-y-sm">MY LISTINGS</h4>
                                 </div>
                                 <div className="col-6@sm padding-y-md">
                                     <ButtonLink to={Pages.CREATE_LISTING}>+ New Listing </ButtonLink>
@@ -93,8 +102,16 @@ export class MyListings extends React.Component<IMyListingsProps, IMyListingsSta
                 <Footer categories={this.state.categories} />
                 </div >
             )
+        } else if (this.state.status == Status.NOT_AUTHENTICATED){
+            return(<Redirect to={Pages.LOGIN}/>)
         } else {
-            return <div>Loading...</div>
+            return (
+                <div>
+                    <Header categories={[]} />
+                    <AccountNav activePage={AccountNavSubPage.LISTING} />
+                    <Footer categories={[]} />
+                </div>
+            )
         }
 
     }

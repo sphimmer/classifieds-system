@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+import { Service} from 'typedi';
 import { APIService } from "./APIService";
 import { IListing } from "entities/IListing";
 import { getUser } from "util/session";
@@ -6,18 +8,20 @@ import { IImageUploadResponse } from "entities/responses/IImageUploadResponse";
 import { ListingRequest } from "entities/requests/ListingRequest";
 import { IListingResponse } from "entities/responses/IListingResponse";
 
+@Service()
 export class ListingService extends APIService {
     public async createListing(listing: IListing): Promise<IListingResponse> {
         const urls = await this.getSignedUrls(listing.images);
         const imageUploadResponses = await this.uploadToSignedUrls(urls, listing.images)
         console.log(imageUploadResponses);
         imageUploadResponses.map(resp => {
-            if (resp.status != 200) {
+            if (resp.status !== 200) {
                 console.error("Error uploading file: " + resp.fileName);
             }
+            return false;
         });
         const listingRequest = new ListingRequest(listing, imageUploadResponses);
-        const savedSession = getUser();
+        const savedSession = await getUser();
         const body = {
             query: `
                 mutation($data: ListingRequest!){
@@ -27,6 +31,7 @@ export class ListingService extends APIService {
                         title
                         description
                         price
+                        thumbnailImage
                         images{
                             id
                             path
@@ -56,7 +61,7 @@ export class ListingService extends APIService {
     }
 
     public async getSignedUrls(files: File[]): Promise<ISignedUrlRepsonse[]> {
-        const savedSession = getUser();
+        const savedSession = await getUser();
         const data = {
             files: files.map(file => {
                 return { "fileName": file.name, "contentType": file.type }
@@ -85,7 +90,7 @@ export class ListingService extends APIService {
 
     public async uploadToSignedUrls(urls: ISignedUrlRepsonse[], files: File[]): Promise<IImageUploadResponse[]> {
         return Promise.all(urls.map(async (signedUrl) => {
-            const file = files.find(file => file.name == signedUrl.fileName);
+            const file = files.find(file => file.name === signedUrl.fileName);
             const response = await this.s3ApiClient.put(signedUrl.URL, file, { headers: { 'Content-Type': file!.type } });
             return { status: response.status, fileName: file!.name, uploadPath: response.config.url!.split('?')[0] }
         }));
@@ -93,7 +98,7 @@ export class ListingService extends APIService {
     }
 
     public async getMyListings(): Promise<IListingResponse[]> {
-        const savedSession = getUser();
+        const savedSession = await getUser();
         const body = {
             query: `{
                 me{
@@ -108,6 +113,7 @@ export class ListingService extends APIService {
                         description
                         price
                         condition
+                        thumbnailImage
                         category{
                             id
                             name

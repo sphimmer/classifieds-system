@@ -14,11 +14,11 @@ import { SignedURL } from "../models/entities/SignedUrl";
 import { SignedUrlRequest } from "../models/requests/SignedUrlRequest";
 
 @Resolver(Listing)
-export class ListingResolver implements IListingResolver{
+export class ListingResolver implements IListingResolver {
 
     private listingService: ListingService;
 
-    constructor(){
+    constructor() {
         this.listingService = Container.get(ListingService);
     }
 
@@ -28,7 +28,11 @@ export class ListingResolver implements IListingResolver{
     }
 
     @Query(() => [Listing])
-    async listings(@Arg('search') search: string): Promise<IListing[]> {
+    async listings(
+        @Arg('search') search: string,
+        @Arg('category', { nullable: true }) category: string,
+        @Arg('page', { defaultValue: 1 }) page: number
+    ): Promise<IListing[]> {
         return await this.listingService.searchListings(search);
     }
 
@@ -41,7 +45,7 @@ export class ListingResolver implements IListingResolver{
 
     @Authorized()
     @Query(() => [SignedURL])
-    async signedUrls(@Arg('data') request: SignedUrlRequest, @Ctx() ctx: IContext): Promise<SignedURL[]>{
+    async signedUrls(@Arg('data') request: SignedUrlRequest, @Ctx() ctx: IContext): Promise<SignedURL[]> {
         const decodedJwt: IJWT = decodeJWT(ctx.token);
         return await this.listingService.getSignedUrls(request.files, decodedJwt.sub)
     }
