@@ -1,8 +1,7 @@
 import {Request, Response, Router} from 'express';
 import { UserController } from '../controllers/UserController';
 import Container from 'typedi';
-import { ILoginRequest } from '../interfaces/ILoginRequest';
-import { HttpStatusCodes } from '../models/enums/HttpStatusCodes';
+import { protectedEndpoint } from '../util/cookieMiddleware';
 
 export class UserRoutes{
     public router: Router;
@@ -15,25 +14,35 @@ export class UserRoutes{
     }
 
     private configure(): void {
-        this.router.post('/login', async (req: Request, res: Response)=>{
-            try{
-                
-                const loginRequest = req.body as ILoginRequest;
-                const loginResult = await this.userController.login(loginRequest);
-                res.status(HttpStatusCodes.OK).send()
-            } catch (error){
-                res.status(error.statusCode).send(error.message)
-            }
-        })
-
-        this.router.get('/auth', async (req: Request, res: Response)=>{
+        
+        this.router.get("/", protectedEndpoint, async (req: Request, res: Response) =>{
             try {
-                // console.log(req)
-                const {headers, body} = req;
-                res.status(HttpStatusCodes.OK).send({headers: headers, body: body});
+                const session = JSON.parse(req.signedCookies.session)
+                const me = await this.userController.getMe(session);
+                res.send(me);
             } catch (error) {
-                console.error(error)
+                res.status(error.statusCode).send(error);
             }
-        })
+        });
+
+        this.router.put("/", protectedEndpoint, async (req: Request, res: Response) =>{
+            try {
+                const session = JSON.parse(req.signedCookies.session)
+                const me = await this.userController.updateMe(session, req);
+                res.send(me);
+            } catch (error) {
+                res.status(error.statusCode).send(error);
+            }
+        });
+
+        this.router.get("/listings", protectedEndpoint, async (req: Request, res: Response) =>{
+            try {
+                const session = JSON.parse(req.signedCookies.session)
+                const listings = await this.userController.getMyListings(session);
+                res.send(listings);
+            } catch (error) {
+                res.status(error.statusCode).send(error);
+            }
+        });
     }
 }

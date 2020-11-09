@@ -4,8 +4,7 @@ import { IListing } from "./IListing";
 
 export interface IUser{
     id?: string;
-    firstName: string;
-    lastName: string;
+    name: string;
     email: string;
     password: string;
     phoneNumber?: string;

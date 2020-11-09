@@ -6,32 +6,40 @@ import { Status } from "enums/Status";
 import { CategoryService } from "api/CategoryService";
 import { AccountNav } from "components/AccountNav";
 import { Redirect } from "react-router-dom";
-import { clearUserSession, getUser } from "util/session";
+import { clearUserSession } from "util/session";
 import { AccountNavSubPage } from "enums/AccountNavSubPage";
 import { IUser } from "entities/IUser";
 import { Button } from "components/form-components/Button";
 import { TextInput } from "components/form-components/TextInput";
 import { ErrorMessage } from "components/ErrorMessage";
-import { ILocalStorage } from "entities/ILocalStorage";
 import { Pages } from "enums/Pages";
 import { IAccountProps } from "entities/props/IAccountProps";
 import { IAccountState } from "entities/states/IAccountState";
+import Container from "typedi";
+import { GlobalState } from "services/GlobalState";
+import { LocationService } from "api/LocationService";
+import { ILocation } from "entities/ILocation";
+import { PageHistory } from "services/PageHistory";
+import { LoadingBar } from "components/LoadingBar";
 
 
 export class MyProfile extends React.Component<IAccountProps, IAccountState>{
     categoryService: CategoryService;
     accountService: AccountService;
+    locationService: LocationService = Container.get(LocationService);
     state: IAccountState = {
         status: Status.LOADING,
         error: undefined!,
         categories: [],
         user: {} as IUser
     }
+    globalState = Container.get(GlobalState);
     constructor(props: IAccountProps) {
         super(props);
         this.categoryService = props.categoryService;
         this.accountService = props.accountService;
-        
+        const pageHistory = Container.get(PageHistory);
+        pageHistory.push(this.props.location.pathname);
         this.updateMe = this.updateMe.bind(this);
         this.setLocationCity = this.setLocationCity.bind(this);
         this.setLocationState = this.setLocationState.bind(this);
@@ -40,15 +48,23 @@ export class MyProfile extends React.Component<IAccountProps, IAccountState>{
 
     async componentDidMount() {
         try {
+            let state = this.state;
             const categoryResponse = await this.categoryService.getCategories();
-            const user: ILocalStorage | null = await getUser();
-            if (user) {
-                const userResponse = await this.accountService.getFullProfile(user);
-                this.setState({ categories: categoryResponse, status: Status.LOADED, user: userResponse })
+            state.categories = categoryResponse;
+            const globalState = Container.get(GlobalState);
+
+            const profileResponse = await this.props.accountService.getFullProfile();
+            console.info(profileResponse);
+
+            if (profileResponse) {
+                globalState.isLoggedIn = true;
+                state.user = profileResponse;
+                state.status = Status.LOADED;
             } else {
-                this.state.status = Status.NOT_AUTHENTICATED;
-                this.setState(this.state);
+                state.status = Status.NOT_AUTHENTICATED;
             }
+
+            this.setState(state);
 
         } catch (error) {
             if (error.message.includes("UNAUTHENTICATED")) {
@@ -61,7 +77,30 @@ export class MyProfile extends React.Component<IAccountProps, IAccountState>{
         }
     }
 
+    async getLocationId(location: ILocation): Promise<string>{
+        let locationId: string;
+        const locationResult = await this.locationService.getLocations(this.state.user.location);
+        console.log(locationResult);
+        if(locationResult.length == 1){
+            locationId = locationResult[0].id!
+        } else if (locationResult.length > 1){
+            // error, choose a specifc location
+            locationId = "";
+        } else{
+            const newLocation = await this.locationService.postLocation(location)
+            console.log(newLocation)
+            locationId = newLocation.id!;
+        }
+
+        return locationId;
+    }
+
     async updateMe(event: MouseEvent<HTMLButtonElement>) {
+        const user = this.state.user
+        if(user.location){
+            user.location.id = await this.getLocationId(user.location)
+        }
+        console.log(user)
         const response = await this.accountService.updateMe(this.state.user);
         if (response) {
             this.state.user = response;
@@ -98,29 +137,21 @@ export class MyProfile extends React.Component<IAccountProps, IAccountState>{
             return (
 
                 <div>
-                    <Header categories={this.state.categories} loggedIn={this.props.session ? true : false}/>
+                    <Header categories={this.state.categories} loggedIn={this.globalState.isLoggedIn} />
                     <AccountNav activePage={AccountNavSubPage.EDIT_PROFILE} />
                     <div className="container grid max-width-sm">
                         <div className="margin-bottom-sm">
                             <div className="grid gap-md text-sm">
                                 <h4 className="padding-y-sm">Edit My Profile </h4>
+                                
                                 <TextInput
-                                    label="First Name"
-                                    name="firstname"
+                                    label="Name"
+                                    name="name"
                                     required={true}
                                     divClass="col-6@sm"
-                                    id="firstname"
-                                    onChange={(event) => { this.state.user.firstName = event.target.value }}
-                                    defaultValue={this.state.user.firstName}
-                                />
-                                <TextInput
-                                    label="Last Name"
-                                    name="lastname"
-                                    required={true}
-                                    divClass="col-6@sm"
-                                    id="lastname"
-                                    onChange={(event) => { this.state.user.lastName = event.target.value }}
-                                    defaultValue={this.state.user.lastName}
+                                    id="name"
+                                    onChange={(event) => { this.state.user.name = event.target.value }}
+                                    defaultValue={this.state.user.name}
                                 />
 
                                 <TextInput
@@ -187,15 +218,18 @@ export class MyProfile extends React.Component<IAccountProps, IAccountState>{
         } else if (this.state.status == Status.LOADING) {
             return (
                 <div>
-                    <Header categories={[]} />
+                    <Header categories={[]} loggedIn={this.globalState.isLoggedIn} />
                     <AccountNav activePage={AccountNavSubPage.EDIT_PROFILE} />
+                    <div className="container grid gap-md">
+                        <div className="col-2 offset-5"><LoadingBar /></div>
+                    </div>
                     <Footer categories={[]} />
                 </div>
             )
         } else if (this.state.status == Status.NOT_AUTHENTICATED) {
             clearUserSession();
             return <Redirect to={Pages.LOGIN + "?error=You've been logged out, log in again."} />
-        } else if (this.state.status === Status.SUCCESS){
+        } else if (this.state.status === Status.SUCCESS) {
             return <Redirect to={Pages.ACCOUNT} />
         } else {
             return (

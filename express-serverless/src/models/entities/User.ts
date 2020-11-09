@@ -11,17 +11,14 @@ export class User implements IUser{
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
-    @Column('varchar')
-    firstName: string;
+    @Column('uuid', {unique: true})
+    cognitoId: string
 
     @Column('varchar')
-    lastName: string;
+    name: string;
 
     @Column('varchar', {unique: true})
     email: string;
-
-    @Column('varchar')
-    password: string;
 
     @ManyToOne((type) => Location, (location) => location.user, {eager: true})
     location: Location;

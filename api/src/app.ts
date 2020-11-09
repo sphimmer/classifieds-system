@@ -14,7 +14,6 @@ import { Container } from "typedi";
 import { LocationResolver } from "./resolvers/LocationResolver";
 import { UserResolver } from "./resolvers/UserResolver";
 import { ListingResolver } from "./resolvers/ListingResolver";
-import { checkJWT } from "./util/jwt";
 import { authChecker } from "./util/authChecker";
 import { IContext } from "./interfaces/IContext";
 import AWS from 'aws-sdk'

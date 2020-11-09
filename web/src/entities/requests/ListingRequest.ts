@@ -1,6 +1,7 @@
 import { IListing } from "entities/IListing";
 import { IImageUploadResponse } from "entities/responses/IImageUploadResponse";
 import { ListingCondition } from "enums/ListingCondition";
+import { IListingResponse } from "entities/responses/IListingResponse";
 
 export class ListingRequest {
     title: string;

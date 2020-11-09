@@ -1,6 +1,8 @@
 import { Timestamp } from "typeorm";
 import { ILocation } from "./ILocation";
 import { IUser } from "./IUser";
+import { ILocationRequest } from "./ILocationRequest";
+import { ExistingResourceRequest } from "../models/requests/ExistingResourceRequest";
 
 /**
  * A request for input of the User Type
@@ -8,14 +10,9 @@ import { IUser } from "./IUser";
 export interface IUserRequest{
 
     /**
-     * User's first name
+     * User's name
      */
-    firstName: string;
-
-    /**
-     * User's last name
-     */
-    lastName: string;
+    name: string;
 
     /**
      * User's email
@@ -25,7 +22,7 @@ export interface IUserRequest{
     /**
      * User's Location
      */
-    location: ILocation;
+    location: ExistingResourceRequest;
 
     /**
      * User's phone number

@@ -1,27 +1,22 @@
-import jwt, { decode, verify } from 'jsonwebtoken';
-import { IUser } from '../interfaces/IUser';
-import { JWT } from '../models/entities/JWT';
-import fs from 'fs';
-import cryptoRandomString from 'crypto-random-string';
-import path from 'path';
+import { decode, verify } from 'jsonwebtoken';
+import Axios from 'axios';
+import { IJwks } from '../interfaces/IJwks';
+import { IJWT } from '../interfaces/IJWT';
+import jwkToPem from 'jwk-to-pem';
+import { UnauthorizedError } from '../errors/UnauthorizedError';
 
-export const createJWT = (user: IUser): string => {
-    const jwtObj = new JWT(user.id, user.email)
-    const cert = fs.readFileSync(path.join(__dirname, '../../jwtRS256.key'));
-    
-    return jwt.sign(JSON.stringify(jwtObj), cert.toString(), { algorithm: 'RS256' });
-}
-
-export const checkJWT = (jwt: string): string | object => {
-    const cert = fs.readFileSync(path.join(__dirname, '../../jwtRS256.key.pub'));
-    return verify(jwt, cert.toString());
-}
-
-export const decodeJWT = (encodedJWT: string): JWT => {
-    const decodedJWT: JWT = decode(encodedJWT) as JWT;
-    return decodedJWT;
-} 
-
-export const createRefreshToken = (): string => {
-    return cryptoRandomString({length: 22})
+export const verifyCognitoJwt = async (cognitoJwt: string): Promise<IJWT> => {
+    const decodedJWT = decode(cognitoJwt, {complete: true}) as any;
+    const response = await Axios.get<IJwks>(process.env.JWKS);
+    const jwk = response.data.keys.filter((jwk) => {
+        return jwk.kid === decodedJWT.header.kid;
+    });
+    const pem = jwkToPem({kty: 'RSA', n: jwk[0].n, e: jwk[0].e, });
+    try {
+        const verifiedJwt = verify(cognitoJwt, pem);
+        return verifiedJwt as IJWT;
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
 }

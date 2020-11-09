@@ -8,5 +8,6 @@ export class ListingImageRequest implements IListingImageRequest{
 
     @Field()
     path: string;
+    
 
 }

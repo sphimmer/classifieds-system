@@ -1,7 +1,5 @@
 import { IUser } from "./IUser";
 import { IUserRequest } from "./IUserRequest";
-import { ILoginRequest } from "./ILoginRequest";
-import { ILoginResult } from "./ILoginResult";
 
 export interface IUserService{
 
@@ -21,12 +19,6 @@ export interface IUserService{
      * @param {IUserRequet} data The request for creating the user
      */
     createUser(data: IUserRequest):Promise<IUser>;
-
-    /**
-     * Logs a user in
-     * @param data The loginRequest containing an email and password
-     */
-    login(data: ILoginRequest): Promise<IUser>;
 
     /**
      * Update the user with the new data

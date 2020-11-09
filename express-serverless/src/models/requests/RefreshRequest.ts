@@ -5,5 +5,4 @@ import { IRefreshRequest } from "../../interfaces/IRefreshRequest";
  */
 export class RefreshRequest implements IRefreshRequest{
     refreshToken: string;
-    
 }

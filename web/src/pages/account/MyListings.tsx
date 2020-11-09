@@ -13,13 +13,16 @@ import { ListingService } from "api/ListingService";
 import { IListingResponse } from "entities/responses/IListingResponse";
 import { Listing } from "components/listing";
 import { Pages } from "enums/Pages";
-import { ILocalStorage } from "entities/ILocalStorage";
+import Container from "typedi";
+import { GlobalState } from "services/GlobalState";
+import { PageHistory } from "services/PageHistory";
+import { LoadingBar } from "components/LoadingBar";
 
 interface IMyListingsProps {
     accountService: AccountService;
     categoryService: CategoryService;
     listingService: ListingService;
-    session: ILocalStorage;
+    location: Location;
 }
 
 interface IMyListingsState {
@@ -37,33 +40,44 @@ export class MyListings extends React.Component<IMyListingsProps, IMyListingsSta
         categories: [],
         listings: []
     }
+
+    globalState = Container.get(GlobalState);
+
     constructor(props: IMyListingsProps) {
         super(props);
+        const pageHistory = Container.get(PageHistory);
+        pageHistory.push(this.props.location.pathname);
         this.accountService = props.accountService;
         this.categoryService = props.categoryService;
         this.listingService = props.listingService;
     }
 
     async componentDidMount() {
+        let status: Status;
         
-        
-        if (this.props.session) {
+        if (this.globalState.isLoggedIn) {
             
             this.state.categories = await this.categoryService.getCategories();
-            this.state.listings = await this.listingService.getMyListings();
-            this.state.status = Status.LOADED;
+            try {
+                this.state.listings = await this.listingService.getMyListings();
+                status = Status.LOADED;
+            } catch (error) {
+                status = Status.NOT_AUTHENTICATED;
+            }
+            
+            
         } else {
-            this.state.status = Status.NOT_AUTHENTICATED;
+            status = Status.NOT_AUTHENTICATED;
         }
         
-        this.setState(this.state);
+        this.setState({status: status});
     }
 
     render() {
         if (this.state.status == Status.LOADED && this.state.listings.length == 0) {
             return (
                 <div>
-                    <Header categories={this.state.categories} loggedIn={this.props.session ? true : false}/>
+                    <Header categories={this.state.categories} loggedIn={this.globalState.isLoggedIn}/>
                     <AccountNav activePage={AccountNavSubPage.LISTING} />
                     <div className="container grid max-width-sm">
                         <div className="margin-bottom-sm">
@@ -81,7 +95,7 @@ export class MyListings extends React.Component<IMyListingsProps, IMyListingsSta
         } else if (this.state.status == Status.LOADED && this.state.listings.length > 0) {
             return (
                 <div>
-                    <Header categories={this.state.categories} loggedIn={this.props.session ? true : false} />
+                    <Header categories={this.state.categories} loggedIn={this.globalState.isLoggedIn} />
                     <AccountNav activePage={AccountNavSubPage.LISTING} />
                     <div className="container grid max-width-sm">
                         <div className="margin-bottom-sm">
@@ -93,7 +107,7 @@ export class MyListings extends React.Component<IMyListingsProps, IMyListingsSta
                                     <ButtonLink to={Pages.CREATE_LISTING}>+ New Listing </ButtonLink>
                                 </div>
                                 {this.state.listings.map(listing => {
-                                    return <Listing listing={listing} />
+                                    return <Listing listing={listing} editable={true}/>
                                 })}
                             </div>
                         </div>
@@ -107,8 +121,11 @@ export class MyListings extends React.Component<IMyListingsProps, IMyListingsSta
         } else {
             return (
                 <div>
-                    <Header categories={[]} />
+                    <Header categories={[]} loggedIn={this.globalState.isLoggedIn} />
                     <AccountNav activePage={AccountNavSubPage.LISTING} />
+                    <div className="container grid gap-md">
+                        <div className="col-2 offset-5"><LoadingBar /></div>
+                    </div>
                     <Footer categories={[]} />
                 </div>
             )

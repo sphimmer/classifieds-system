@@ -18,5 +18,10 @@ export interface IJWT {
     /**
      * Issue time
      */
-    iat: number
+    iat: number,
+
+    phone_number: string,
+
+    name: string,
+    iss: string
 }

@@ -24,7 +24,7 @@ export class Footer extends React.Component<IFooterProps> {
                         </div>
 
                         <nav className="col-6@lg order-2@lg text-xs">
-                            <CategoryLinks categories={this.props.categories} />
+                            <CategoryLinks linkOnClick={()=>{}} categories={this.props.categories} />
                         </nav>
                     </div>
 

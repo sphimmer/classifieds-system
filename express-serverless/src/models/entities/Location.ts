@@ -1,6 +1,7 @@
 import { ILocation } from "../../interfaces/ILocation";
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, Timestamp, CreateDateColumn, DeleteDateColumn, ManyToOne } from "typeorm";
 import { User } from "./User";
+import { Listing } from "./Listing";
 
 /**
  * @inheritdoc
@@ -21,6 +22,9 @@ export class Location implements ILocation{
     @OneToMany((type) => User, (user) => user.location)
     user: User;
 
+    @OneToMany((type) => Listing, (listing) => listing.location)
+    listing: Listing;
+    
     /**
      * @inheritdoc
      */

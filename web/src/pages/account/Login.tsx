@@ -28,8 +28,7 @@ export class Login extends React.Component<ILoginProps, ILoginState> {
     private accountService: AccountService;
     state: ILoginState = {
         user: {
-            firstName: "",
-            lastName: "",
+            name: "",
             email: "",
             password: ""
         },
@@ -42,11 +41,7 @@ export class Login extends React.Component<ILoginProps, ILoginState> {
         this.accountService = props.accountService;
         this.addPassword = this.addPassword.bind(this);
         this.submitForm = this.submitForm.bind(this);
-        this.addEmail = this.addEmail.bind(this);
-        
-
-        
-
+        this.addEmail = this.addEmail.bind(this); 
     }
 
     async componentDidMount() {
@@ -60,21 +55,21 @@ export class Login extends React.Component<ILoginProps, ILoginState> {
     }
 
     async submitForm(event: FormEvent<HTMLElement>) {
-        this.state.formError = "";
-        this.state.formStatus = Status.LOADING;
-        this.setState(this.state);
-        event.preventDefault()
+        // this.state.formError = "";
+        // this.state.formStatus = Status.LOADING;
+        // this.setState(this.state);
+        // event.preventDefault()
 
-        try {
-            // console.log(this.state.user)
-            const response = await this.accountService.login(this.state.user);
-            this.state.formStatus = Status.SUCCESS;
-            this.setState(this.state)
-        } catch (error) {
-            this.state.formError = error.message;
-            this.state.formStatus = Status.FAILED;
-            this.setState(this.state);
-        }
+        // try {
+        //     // console.log(this.state.user)
+        //     const response = await this.accountService.login(this.state.user);
+        //     this.state.formStatus = Status.SUCCESS;
+        //     this.setState(this.state)
+        // } catch (error) {
+        //     this.state.formError = error.message;
+        //     this.state.formStatus = Status.FAILED;
+        //     this.setState(this.state);
+        // }
 
 
     }

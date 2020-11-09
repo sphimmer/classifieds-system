@@ -1,7 +1,7 @@
 import { IUser } from "./IUser";
 import { IUserRequest } from "./IUserRequest";
-import { ILoginRequest } from "./ILoginRequest";
-import { ILoginResult } from "./ILoginResult";
+import { User } from "../models/entities/User";
+
 
 export interface IUserService{
 
@@ -14,31 +14,19 @@ export interface IUserService{
     /**
      * Gets the user by their session
      */
-    getMe(): Promise<IUser>;
+    getMe(congitoId: string): Promise<IUser>;
 
     /**
      * Creates a new user
      * @param {IUserRequet} data The request for creating the user
      */
-    createUser(data: IUserRequest):Promise<IUser>;
-
-    /**
-     * Logs a user in
-     * @param data The loginRequest containing an email and password
-     */
-    login(data: ILoginRequest): Promise<IUser>;
+    createUser(user: User):Promise<IUser>;
 
     /**
      * Update the user with the new data
      * @param data the data that will update the user
      * @param userId the id of the user from the jwt
      */
-    updateMe(data: IUserRequest, userId: string): Promise<IUser>;
+    updateMe(data: IUser, userId: string): Promise<IUser>;
     
-    /**
-     * Set the refresh token to the user according to session duration
-     * @param userId the user's id
-     * @param refreshToken the refresh token value
-     */
-    setRefreshToken(userId: string, refreshToken: string): Promise<boolean>;
 }

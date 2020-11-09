@@ -1,94 +1,43 @@
 import 'reflect-metadata';
-import { Service} from 'typedi';
+import { Service } from 'typedi';
 import { APIService } from "./APIService";
 import { IListing } from "entities/IListing";
-import { getUser } from "util/session";
 import { ISignedUrlRepsonse } from "entities/responses/ISignedUrlResponse";
 import { IImageUploadResponse } from "entities/responses/IImageUploadResponse";
 import { ListingRequest } from "entities/requests/ListingRequest";
 import { IListingResponse } from "entities/responses/IListingResponse";
+import { IContactInfo } from 'entities/IContactInfo';
+import { ListingUpdateRequest } from 'entities/requests/ListingUpdateRequest';
 
 @Service()
 export class ListingService extends APIService {
-    public async createListing(listing: IListing): Promise<IListingResponse> {
-        const urls = await this.getSignedUrls(listing.images);
-        const imageUploadResponses = await this.uploadToSignedUrls(urls, listing.images)
-        console.log(imageUploadResponses);
-        imageUploadResponses.map(resp => {
-            if (resp.status !== 200) {
-                console.error("Error uploading file: " + resp.fileName);
-            }
-            return false;
-        });
-        const listingRequest = new ListingRequest(listing, imageUploadResponses);
-        const savedSession = await getUser();
-        const body = {
-            query: `
-                mutation($data: ListingRequest!){
-                    createListing(data: $data)
-                    {
-                        id
-                        title
-                        description
-                        price
-                        thumbnailImage
-                        images{
-                            id
-                            path
-                        }
-                        category{
-                            id
-                            name
-                        }
-                        user{
-                            id
-                            email
-                        }
-                    }
-
-            }
-            `,
-            variables: {
-                data: listingRequest
-            }
-        }
-        const response = await this.apiClient.post('/graphql', body, { headers: { 'Authorization': 'Bearer ' + savedSession!.jwt } });
-        if (response.data.hasOwnProperty('errors')) {
-            throw new Error(response.data.errors[0].extensions.code + ': ' + response.data.errors[0].message);
-        }
+    public async createListing(listing: ListingRequest): Promise<IListingResponse> {
+        const response = await this.apiClient.post('/listings', listing);
         console.log(response);
-        return response.data.data.createListing;
+        return response.data;
     }
 
-    public async getSignedUrls(files: File[]): Promise<ISignedUrlRepsonse[]> {
-        const savedSession = await getUser();
+    private async getSignedUrls(files: File[]): Promise<ISignedUrlRepsonse[]> {
+
         const data = {
             files: files.map(file => {
                 return { "fileName": file.name, "contentType": file.type }
             })
         }
-        const body = {
-            query: `
-                    query($data: SignedUrlRequest!){
-                        signedUrls(data: $data){
-                            URL
-                            fileName
-                    }
-                }
-            `, variables: {
-                data: data
-            }
-        };
 
+        const response = await this.apiClient.post('/listings/signedUrls', data);
 
-        const response = await this.apiClient.post('/graphql', body, { headers: { 'Authorization': 'Bearer ' + savedSession!.jwt } });
-        if (response.data.hasOwnProperty('errors')) {
-            throw new Error(response.data.errors[0].extensions.code + ': ' + response.data.errors[0].message);
-        }
-        return response.data.data.signedUrls;
+        return response.data;
     }
 
-    public async uploadToSignedUrls(urls: ISignedUrlRepsonse[], files: File[]): Promise<IImageUploadResponse[]> {
+    public async uploadImages(files: File[]): Promise<IImageUploadResponse[]> {
+        const urls = await this.getSignedUrls(files);
+        const imageUploadResponses = await this.uploadToSignedUrls(urls, files)
+       
+        return imageUploadResponses
+    }
+
+    private async uploadToSignedUrls(urls: ISignedUrlRepsonse[], files: File[]): Promise<IImageUploadResponse[]> {
         return Promise.all(urls.map(async (signedUrl) => {
             const file = files.find(file => file.name === signedUrl.fileName);
             const response = await this.s3ApiClient.put(signedUrl.URL, file, { headers: { 'Content-Type': file!.type } });
@@ -98,43 +47,40 @@ export class ListingService extends APIService {
     }
 
     public async getMyListings(): Promise<IListingResponse[]> {
-        const savedSession = await getUser();
-        const body = {
-            query: `{
-                me{
-                    location{
-                        city
-                        zip
-                        state
-                    }
-                    listings{
-                        id
-                        title
-                        description
-                        price
-                        condition
-                        thumbnailImage
-                        category{
-                            id
-                            name
-                        }
-                        images{
-                            id
-                            path
-                        }
-                        dateCreated
-                        dateExpires
-                        
-                    }
-                }
-            }
-            `
-        }
-        const response = await this.apiClient.post('/graphql', body, { headers: { 'Authorization': 'Bearer ' + savedSession!.jwt } });
 
-        return response.data.data.me.listings.map((listing: any) => {
-            listing.user = { location: response.data.data.me.location };
-            return listing;
-        });
+        const response = await this.apiClient.get('/me/listings');
+
+        return response.data;
+    }
+
+    public async getListing(id: string): Promise<IListingResponse> {
+        const response = await this.apiClient.get(`/listings/${id}`)
+        return response.data;
+    }
+
+    async getListingContact(id: string): Promise<IContactInfo> {
+        const response = await this.apiClient.get(`/listings/${id}/contact`)
+        return response.data;
+    }
+
+    async deleteListing(id: string): Promise<boolean> {
+        const response = await this.apiClient.delete(`/listings/${id}`);
+        console.log(response);
+        if (response.status == 204) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    async searchListings(searchTerm: string): Promise<IListingResponse[]> {
+        const response = await this.apiClient.get<IListingResponse[]>('/listings/', { params: { search: searchTerm } });
+        return response.data;
+    }
+
+    async updateListing(listing: ListingUpdateRequest): Promise<IListingResponse[]> {
+        const response = await this.apiClient.put(`/listings/${listing.id}`, listing);
+        console.log(response);
+        return response.data;
     }
 }

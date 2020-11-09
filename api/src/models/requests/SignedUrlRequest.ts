@@ -6,5 +6,5 @@ import { FileRequest } from "./FileRequest";
 @InputType()
 export class SignedUrlRequest implements ISignedUrlRequest{
     @Field(() => [FileRequest])
-    files: FileRequest[];   
+    files: FileRequest[];
 }

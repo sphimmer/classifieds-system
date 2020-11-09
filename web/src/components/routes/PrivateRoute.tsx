@@ -1,9 +1,10 @@
 import React from "react";
 import { Status } from "enums/Status";
 import { ILocalStorage } from "entities/ILocalStorage";
-import { getUser } from "util/session";
 import { Route, Redirect } from "react-router-dom";
 import { Pages } from "enums/Pages";
+import Container from "typedi";
+import { GlobalState } from "services/GlobalState";
 
 interface IPrivateRouteState {
     status: Status;
@@ -18,13 +19,13 @@ export class PrivateRoute extends React.Component<any, IPrivateRouteState>{
     }
 
     async componentDidMount() {
-        try {
-            this.state.localStorage = await getUser()
+        const globalState = Container.get(GlobalState);
+        if (globalState.isLoggedIn) {
             this.state.status = Status.SUCCESS;
-        } catch (error) {
-            console.error(error)
+        } else {
             this.state.status = Status.FAILED;
         }
+        
         this.setState(this.state);
     }
 
@@ -35,14 +36,14 @@ export class PrivateRoute extends React.Component<any, IPrivateRouteState>{
         } else if (this.state.status === Status.SUCCESS) {
             return(<Route {...rest} render={(props) => (
                 
-                this.state.localStorage
-                    ? <Component {...props} {...rest} session={this.state.localStorage}/>
-                    : <Redirect to={Pages.LOGIN + '?error=Please log in to continue'} />
+                
+                <Component {...props} {...rest} session={this.state.localStorage}/>
+                    
 
 
             )} />)
         } else {
-            return <Redirect to={Pages.LOGIN + '?error=Please log in to continue'} />
+            return <Redirect to={Pages.ACCOUNT + '?error=Please log in to continue'} />
         }
     }
 }

@@ -7,6 +7,9 @@ export class JWT implements IJWT{
         this.email = email;
         this.iat = Math.floor(Date.now() / 1000);
     }
+    iss: string;
+    phone_number: string;
+    name: string;
     
     iat: number;
     exp: number;

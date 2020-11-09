@@ -1,9 +1,9 @@
-import { IApiError } from "../interfaces/IApiError";
 import { HttpStatusCodes } from "../models/enums/HttpStatusCodes";
+import { HttpError } from "./HTTPError";
 
-export class BadRequestError extends Error implements IApiError{
-    statusCode: HttpStatusCodes = HttpStatusCodes.BAD_REQUEST;
-    constructor(message: string){
-        super(message);
+export class BadRequestError extends HttpError{
+   
+    constructor(errors: any){
+        super(HttpStatusCodes.BAD_REQUEST, "Invalid Request", errors);
     }
 }

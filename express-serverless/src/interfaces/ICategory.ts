@@ -8,7 +8,7 @@ export interface ICategory{
     /**
      * The unique identifier of the category
      */
-    id: string;
+    id?: string;
 
     /**
      * The name of the category
@@ -18,12 +18,12 @@ export interface ICategory{
     /**
      * A boolean to determine if the category is archived or not
      */
-    dateDeleted: Timestamp;
+    dateDeleted?: Timestamp;
 
     /**
      * The date the category was created
      */
-    dateCreated: Timestamp;
+    dateCreated?: Timestamp;
 
     /**
      * The children categories 

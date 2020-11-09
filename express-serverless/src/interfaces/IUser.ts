@@ -12,14 +12,9 @@ export interface IUser{
     id: string;
 
     /**
-     * User's first name
+     * User's name
      */
-    firstName: string;
-
-    /**
-     * User's last name
-     */
-    lastName: string;
+    name: string
 
     /**
      * User's email
@@ -50,12 +45,6 @@ export interface IUser{
      * Date user deleted account
      */
     dateDeleted: Timestamp;
-
-    /**
-     * user's password
-     */
-    password: string;
-
 
     /**
      * user's refresh token for renewing a session

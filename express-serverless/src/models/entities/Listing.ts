@@ -1,13 +1,12 @@
 import { IListing } from "../../interfaces/IListing";
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, Timestamp, ManyToOne, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, Index } from "typeorm";
-
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, Timestamp, ManyToOne, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from "typeorm";
 import { ListingImage } from "./ListingImage";
-
 import { IUser } from "../../interfaces/IUser";
 import { User } from "./User";
 import { ICategory } from "../../interfaces/ICategory";
 import { Category } from "./Category";
 import { ConditionEnum } from "../enums/ConditionEnum";
+import { Location } from "./Location";
 
 /**
  * @inheritdoc
@@ -65,7 +64,7 @@ export class Listing implements IListing{
     /**
      * @inheritdoc
      */
-    @ManyToOne((type) => User, (user) => user.listings, {eager: true})
+    @ManyToOne((type) => User, (user) => user.listings)
     user: IUser;
     
     /**
@@ -74,6 +73,8 @@ export class Listing implements IListing{
     @ManyToOne((type) => Category, (category) => category.listings)
     category: ICategory;
 
+    @ManyToOne((type) => Location, (location) => location.listing, {eager: true})
+    location: Location;
 
     /**
      * @inheritdoc
@@ -104,4 +105,5 @@ export class Listing implements IListing{
      */
     @Column({type: 'tsvector', nullable: true})
     document: string;
+    listing: import("/Users/stuarthimmer/Documents/Laughing Owl/classifieds-system/express-serverless/src/interfaces/ILocation").ILocation;
 }

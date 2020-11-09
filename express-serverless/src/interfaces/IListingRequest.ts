@@ -1,11 +1,18 @@
 import { IListingImageRequest } from "./IListingImageRequest";
 import { IListing } from "./IListing";
 import { ConditionEnum } from "../models/enums/ConditionEnum";
+import { IExistingResourceRequest } from "./IExistingResourceRequest";
+import { User } from "../models/entities/User";
 
 /**
  * A request for a listing
  */
 export interface IListingRequest{
+
+    /**
+     * Listing id
+     */
+    id?: string;
 
     /**
      * Listing Title
@@ -32,8 +39,10 @@ export interface IListingRequest{
      */
     condition: ConditionEnum;
 
+    category: IExistingResourceRequest;
+
     /**
      * converts data to an Entity object
      */
-    toEntity(userId: string): IListing;
+    toEntity(user: User): IListing;
 }

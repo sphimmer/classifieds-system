@@ -6,8 +6,9 @@ import { Link } from "react-router-dom";
 import { HeaderSearchField } from "./HeaderSearchField";
 import { Size } from "enums/Size";
 import { Pages } from "enums/Pages";
-import { MegaMenuCategories } from "./MegaMenuCategories";
+
 import React, { MouseEvent } from "react";
+import { CategoryLinks } from "./CategoryLinks";
 
 
 
@@ -15,6 +16,7 @@ import React, { MouseEvent } from "react";
 interface IHeaderProps {
     categories: ICategory[];
     loggedIn?: boolean;
+    searchTerm?: string;
 }
 
 interface IHeaderState {
@@ -28,14 +30,22 @@ export class Header extends React.Component<IHeaderProps, IHeaderState> {
     }
 
     constructor(props: IHeaderProps) {
-        super(props)
-
+        super(props);
+        console.log(this.props)
         this.toggleCategoryMenu = this.toggleCategoryMenu.bind(this);
+        this.closeCategoryMenu = this.closeCategoryMenu.bind(this)
     }
 
     toggleCategoryMenu(event: MouseEvent<HTMLAnchorElement>) {
         event.preventDefault();
-        this.setState({showCategoryMenu: !this.state.showCategoryMenu});
+        console.log(this.state.showCategoryMenu)
+        const show = this.state.showCategoryMenu;
+        this.setState({ showCategoryMenu: !show });
+    }
+
+    closeCategoryMenu() {
+        console.log("close")
+        this.setState({ showCategoryMenu: false });
     }
 
     componentDidMount() {
@@ -49,33 +59,57 @@ export class Header extends React.Component<IHeaderProps, IHeaderState> {
     componentWillUnmount() {
         document.getElementById('_2_flexi-header')!.remove()
     }
+
     render() {
-        return (
-            <header className="margin-bottom-md" >
-                <div className="container grid text-component max-width-lg">
-                    <div className="col-2@md padding-y-xs padding-x-sm">
-                        <Logo size={Size.sm} />
-                    </div>
-                    <div className="col-3@md header-border padding-top-sm padding-x-sm grid">
-                        <HeaderSearchField />
-                    </div>
-                    <div className="col-2@md header-border padding-top-sm padding-x-sm grid">
-                        <a href="#categories" onClick={this.toggleCategoryMenu} className="f-header__link">
-                            <span>Categories</span>
-                            <svg className="f-header__dropdown-icon icon" aria-hidden="true" viewBox="0 0 12 12">
-                                <path d="M6,9l4-5H2Z" /></svg>
-                        </a>
-                    </div>
-                    <div className="col-2@md padding-top-sm header-border padding-x-sm grid">
-                        <Link to={Pages.CREATE_LISTING} className="f-header__link">+ Create Listing</Link>
+        const menu = (
+            <>
+                <div className="col-2@md padding-y-xs padding-x-sm">
+                    <Logo size={Size.lg} />
+                </div>
+                <div className="col-3@md header-border padding-top-sm padding-x-sm grid">
+                    <HeaderSearchField searchTerm={this.props.searchTerm} />
+                </div>
+                <div className="col-2@md header-border padding-top-sm padding-x-sm grid">
+                    <a href="#categories" onClick={this.toggleCategoryMenu} className="f-header__link">
+                        <span>Categories</span>
+                        <svg className="f-header__dropdown-icon icon" aria-hidden="true" viewBox="0 0 12 12">
+                            <path d="M6,9l4-5H2Z" /></svg>
+                    </a>
+                </div>
+                <div className="col-2@md padding-top-sm header-border padding-x-sm grid">
+                    <Link to={Pages.CREATE_LISTING} className="f-header__link">+ Create Listing</Link>
+
+                </div>
+                <div className="col-3@md padding-top-sm header-border padding-x-sm grid">
+                    <AccountLinks loggedIn={this.props.loggedIn ? true : false} />
+                </div>
+            </>
+        )
+        if (!this.state.showCategoryMenu) {
+            return (
+                <header className="margin-bottom-md" >
+                    <div className="container grid text-component max-width-lg">{menu}</div>
+                </header>);
+        } else if (this.state.showCategoryMenu) {
+            return (
+                <header className="margin-bottom-md" >
+                    <div className="container grid text-component max-width-lg">
+                        {menu}
 
                     </div>
-                    <div className="col-3@md padding-top-sm header-border padding-x-sm grid">
-                        <AccountLinks loggedIn={this.props.loggedIn ? true : false}/>
+                    <div className="container max-width-md grid position-absolute bg z-index-overlay shadow-lg radius-lg Absolute-Center">
+                        <div className="col-1 offset-11"><button onClick={this.closeCategoryMenu}>X</button></div>
+                        <CategoryLinks linkOnClick={this.closeCategoryMenu} categories={this.props.categories} />
                     </div>
-                </div>
-                <MegaMenuCategories isVisible={this.state.showCategoryMenu} categories={this.props.categories} />
-            </header>
-        )
+                </header>
+
+
+            )
+
+        } else {
+
+        }
+
+
     }
 }
