@@ -29,7 +29,7 @@ export class Gallery extends React.Component<IGalleryProps, IGalleryState>{
     }
 
     async setMainImage(event: MouseEvent<HTMLImageElement>){
-        console.log(event.currentTarget.src)
+        
         this.setState({mainImage: {path: event.currentTarget.src}})
     }
 
