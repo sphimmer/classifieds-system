@@ -24,9 +24,9 @@ export class AuthRoutes {
                     throw new BadRequestError('Auth code not provided');
                 }
                 const session: ISession = await this.authController.authorizeUser(authCode);
-                const state = JSON.parse(new Buffer(req.query.state, 'base64').toString('ascii'));
+                const state = JSON.parse(Buffer.from(req.query.state, 'base64').toString('ascii'));
                 state.isLoggedIn = true;
-                const stateEncoded = new Buffer(JSON.stringify(state)).toString('base64');
+                const stateEncoded = Buffer.from(JSON.stringify(state)).toString('base64');
 
                 res.cookie('session',
                      JSON.stringify(session), 

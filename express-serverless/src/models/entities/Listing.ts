@@ -7,6 +7,7 @@ import { ICategory } from "../../interfaces/ICategory";
 import { Category } from "./Category";
 import { ConditionEnum } from "../enums/ConditionEnum";
 import { Location } from "./Location";
+import { ILocation } from "../../interfaces/ILocation";
 
 /**
  * @inheritdoc
@@ -105,5 +106,5 @@ export class Listing implements IListing{
      */
     @Column({type: 'tsvector', nullable: true})
     document: string;
-    listing: import("/Users/stuarthimmer/Documents/Laughing Owl/classifieds-system/express-serverless/src/interfaces/ILocation").ILocation;
+    listing: ILocation;
 }
