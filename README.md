@@ -1,12 +1,15 @@
 # classifieds-system
 This is a pet project to make a Classifieds ad System
 
-## Technologies
-I built this using TypeScript so as to teach myself the language.
-I started with a Graph API but then chose to do a REST JSON API with Express instead.
-The frontend is React. Starting this, I had no experience with React and this was a great way to learn.
-I leverage AWS Cognito for Secure user Authentication.
+# Getting Started
+how to setup local development environment and start contributing
 
-## Testing
-I have not setup a testing for this application at this time
+## Pre-requisites
+- [Docker Desktop](https://www.docker.com/products/docker-desktop)
+- [Node](https://nodejs.org/en/)
 
+Navigate to `/api` and run `npm install`
+Navigate to `/web` and run `npm install`
+
+follow the ReadMe found at `/api/README.md` for further details on how to run the API and database
+To start the web project run `cd web/` and then `npm start`
